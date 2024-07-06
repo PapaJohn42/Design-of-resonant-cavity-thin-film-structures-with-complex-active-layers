@@ -57,15 +57,19 @@ q2D = 0.2  #initial guess
 ##ns=cr2[-1] +1j*ci2[-1]
 ##(cr2b,ci2b,_,_,_) = contour(ns, nD, 0.23, wl, npts)
 #print('> c2b endpoint=', cr2b[-1] + 1j*ci2b[-1])
+
 def two_contour_equations(p, nf1, nf2, ns, na):
 	q1,q2 = p
 	(cr,ci,_,qr,qi) = contour(ns, nf1, q1, wl, 2)
 	ns = cr[-1]+1j*ci[-1]
 	(cr,ci,_,qr,qi) = contour(ns, nf2, q2, wl, 2)
-	
-	return (cr[-1]-np.real(na), ci[-1]-np.imag(na)) 
+	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
+
+##n1b=0.093+1j*2.498
+##n3b=0.258+1j*2.486
+##nC=2.5+1j*0.25
+##nD=2.5
 q2C, q2D = fsolve(two_contour_equations, (q2C,q2D), (nC, nD, n1b, n3b))
-##q2C, q2D = fsolve(two_contour_complex_equations, (q2C,q2D), (nC, nD, n1b, n3b))
 print('q2C=', q2C)
 print('q2D=', q2D)
 ###
