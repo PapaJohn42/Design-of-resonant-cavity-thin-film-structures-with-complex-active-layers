@@ -1,42 +1,19 @@
-#For use in 'Design of resonant cavity thin...' only.
-#Based on '15.2.10 Solving for the Metal and Dielectric Thickness...'
+##For use in 'Design of resonant cavity thin...' only.
+##Based on '15.2.10 Solving for the Metal and Dielectric Thickness...'
 import numpy as np
-from scipy.optimize import fsolve
 from contour import contour
-from two_contour_equations import two_contour_equations
+from unit_cell_contour import unit_cell_contour
 import matplotlib.pyplot as plt
 
-##Function for calculating equivalent index(n), phase thickness(q) and create an endpoint
-## for trilayer unit cells of N size
-def unit_cell_contour(ns, n1, n2, N):   #n1=outer film index, n2=cetral film index
-    #print('--unit cell contour')   #debug
-    cr=[np.real(ns)]*(N+1)  #c[0] contains the ns of previous film layer
-    #print('cr=',cr)    #debug
-    ci=[np.imag(ns)]*(N+1)
-    #print('ci=',ci)    #debug
-    t=[None]*(N+1)
-    qr=[None]*(N+1)
-    qi=[None]*(N+1)
-    i = 1
-    while i <= N:
-        #print('loop ', i)  #debug
-        nf = +1j * n1
-        q2 = np.arccos(complex((-1/2)*((n1/n2)+(n2/n1)))) / (np.pi/2)
-        (cr[i],ci[i],t[i],qr[i],qi[i]) = contour(ns, nf, q2, wl, npts)
-        ns = cr[i][-1] + 1j*ci[i][-1]
-        cr[i]=cr[i][-1]
-        ci[i]=ci[i][-1]
-        i += 1
-    return cr, ci, t, qr, qi
-
-##Parametres setup
-wl = 1550.0 #Wavelength in nm
+##Parameters setup
 ns = 1.0    #same as air
 nH = 2.5
 nL = 1.5
 nD = nH     #Central D layer, equal to nH in this case
 t = 1.0     #Each films are quarter-wave thick
-npts = 100
+wl = 1550.0 #Wavelength in nm
+npts = 1000
+
 ##The cavity structure is H/2 U4 D U4 H/2; U = H/2 L H/2
 
 ##From Substrate to H/2, assuming the substrate is air
@@ -52,7 +29,7 @@ print('-----')
 
 ##From H/2 to U^4 (U=H/2 L H/2)
 ns = cr1[-1] + 1j*ci1[-1]
-(cr2, ci2, t2, qr2, qi2) = unit_cell_contour(ns, nH, nL, 4)
+(cr2, ci2, t2, qr2, qi2) = unit_cell_contour(ns, nH, nL, 4, wl, npts)
 print('cr2=', cr2)
 print('ci2=', ci2)
 print('c2 endpoint=', cr2[-1], ci2[-1])
@@ -74,18 +51,18 @@ print('-----')
 
 ##From U^4 to H(D) central layer
 ns = cr2[-1] + 1j*ci2[-1]
-##nf3 = nH    #Centarl D layer contain only real part
-nf3 = 2.5 +1j*0.25   #Central D layer cotain both real and imag part. The example use 2.5j*print('nf3=', nf3)
+nf3 = nH    #Centarl D layer contain only real part
+##nf3 = 2.5 +1j*0.25   #Central D layer cotain both real and imag part. The example use 2.5j*print('nf3=', nf3)
 qr3 = t     #Central layer is H
 print('qr3=', qr3)
-(cr3, ci3, t3, qr3, qi3) = contour(ns, nf3, qr3, wl, 1500)
+(cr3, ci3, t3, qr3, qi3) = contour(ns, nf3, qr3, wl, npts)
 print('c3 endpoint=', cr3[-1], ci3[-1])
 print('-----')
 
 
 ##From H(D) to U^4 (U=H/2 L H/2)
 ns = cr3[-1] + 1j*ci3[-1]
-(cr4, ci4, t4, qr4, qi4) = unit_cell_contour(ns, nH, nL, 4)
+(cr4, ci4, t4, qr4, qi4) = unit_cell_contour(ns, nH, nL, 4, wl, npts)
 print('cr4=', cr4)
 print('ci4=', ci4)
 print('c4 endpoint=', cr4[-1], ci4[-1])
@@ -114,6 +91,7 @@ print('c5 endpoint=', cr5[-1], ci5[-1])
 print('-----')
 
 
+##Plotting the contour graph
 plt.plot(cr1, ci1, color='grey')
 plt.plot(cr2, ci2, color='purple', linestyle='dashed', marker = 'o')    
 plt.plot(cr3, ci3, color='green')
