@@ -22,7 +22,12 @@ wl = 1550.0         #Wavelength in nm
 npts = 1000
 
 ##The cavity structure is H/2 U4 (C D C) U2 H/2; U = (H/2 L H/2)
-
+print('Parameters')
+print('nC=', nC)
+print('nD=', nD)
+print('wl=', wl)
+print('N=', N)
+print('M=', M)
 
 ##From substrate to U3, assuming the substrate is air
 ##---From substrate to H/2. '1a'
@@ -30,8 +35,8 @@ npts = 1000
 ##---From H/2 to U3 '1b'
 ns = cr1a[-1] + 1j*ci1a[-1]
 (cr1b, ci1b, t1b, qr1b, qi1b) = unit_cell_contour(ns, nH, nL, N, wl, 2)
-print('cr1b=', cr1b)
-print('ci1b=', ci1b)
+##print('cr1b=', cr1b)
+##print('ci1b=', ci1b)
 print('> c1b endpoint=', cr1b[-1] + 1j*ci1b[-1])
 print('-----')
 
@@ -43,8 +48,8 @@ nf3a = -nH          #Use -nH since we want to plot in the reverse direction
 ##---From H/2 to U2 '3b'
 ns = cr3a[-1] + 1j*ci3a[-1]
 (cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 2)    #-nH and -nL are used since we calculate the coutour in reverse order (mirror of c1)
-print('cr3b=', cr3b)
-print('ci3b=', ci3b)
+##print('cr3b=', cr3b)
+##print('ci3b=', ci3b)
 print('> c3b endpoint=', cr3b[-1] + 1j*ci3b[-1])
 print('-----')
 
@@ -69,17 +74,17 @@ print('q2C=', q2C)
 print('q2D=', q2D)
 
 (cr2a, ci2a, t2a, qr2a, qi2a) = contour(n1b, nC, q2C, wl, npts)
-print('> t2a=', t2a[-1])
-print('> q2a=', qr2a[-1]/(np.pi/2) + 1j*qi2a[-1]/(np.pi/2), 'pi/2 unit')
+##print('> t2a=', t2a[-1])
+##print('> q2a=', qr2a[-1]/(np.pi/2) + 1j*qi2a[-1]/(np.pi/2), 'pi/2 unit')
 ns=cr2a[-1] +1j*ci2a[-1]
 (cr2b, ci2b, t2b, qr2b, qi2b) = contour(ns, nD, q2D, wl, npts)
-print('> t2b =', t2b[-1])
-print('> q2b=', qr2b[-1]/(np.pi/2) + 1j*qi2b[-1]/(np.pi/2), 'pi/2 unit')
+##print('> t2b =', t2b[-1])
+##print('> q2b=', qr2b[-1]/(np.pi/2) + 1j*qi2b[-1]/(np.pi/2), 'pi/2 unit')
 ns=cr2b[-1] +1j*ci2b[-1]
 (cr2c, ci2c, t2c, qr2c, qi2c) = contour(ns, nC, q2C, wl, npts)
-print('> t2c =', t2c[-1])
-print('> q2c=', qr2c[-1]/(np.pi/2) + 1j*qi2c[-1]/(np.pi/2), 'pi/2 unit')
-print('Material used: t2C=', t2a[-1]+t2c[-1], 'nm; t2D=', t2b[-1], ' nm')
+##print('> t2c =', t2c[-1])
+##print('> q2c=', qr2c[-1]/(np.pi/2) + 1j*qi2c[-1]/(np.pi/2), 'pi/2 unit')
+print('Material used: t2C=', t2a[-1], 'nm; t2D=', t2b[-1], ' nm')
 
 
 ##Plotting the contour graph
