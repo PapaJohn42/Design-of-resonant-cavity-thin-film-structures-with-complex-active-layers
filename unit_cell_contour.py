@@ -5,8 +5,9 @@ import numpy as np
 from contour import contour
 
 def unit_cell_contour(ns, n1, n2, N, wl, npts):   #n1=outer film index, n2=cetral film index
- #print('--unit cell contour')   #debug
-    cr=[np.real(ns)]*(N+1)  #c[0] contains the ns of previous film layer
+    #print('--unit cell contour')   #debug
+    #--Create an array of N+1 size. Where cr[0] = ns.
+    cr=[np.real(ns)]*(N+1)
     #print('cr=',cr)    #debug
     ci=[np.imag(ns)]*(N+1)
     #print('ci=',ci)    #debug
