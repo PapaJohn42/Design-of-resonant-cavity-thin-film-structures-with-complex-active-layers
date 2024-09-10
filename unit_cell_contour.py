@@ -4,7 +4,13 @@
 import numpy as np
 from contour import contour
 
-def unit_cell_contour(ns, n1, n2, N, wl, npts):   #n1=outer film index, n2=cetral film index
+#ns = substrate index
+#n1 = outer film index
+#n2 = central film index
+#N = number of trilayer structures
+#wl = wavelength (nm)
+#npts = number of plotted points
+def unit_cell_contour(ns, n1, n2, N, wl, npts):
     #print('--unit cell contour')   #debug
     #--Create an array of N+1 size. Where cr[0] = ns.
     cr=[np.real(ns)]*(N+1)

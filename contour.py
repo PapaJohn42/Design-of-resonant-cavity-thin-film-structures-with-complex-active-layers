@@ -1,9 +1,10 @@
 import numpy as np
 #ns = substrate (or equivalent. ie previous film)
 #nf = film index
-#phase = in units of pi/2 (real part only)
+#phase = Phase thickness in units of pi/2 (real part only)
 #wl = wavelength in nm
 #npts = number of points in arc
+
 def contour(ns, nf, phase, wl, npts):
     phase = phase*(1.0 + 1j*np.imag(nf)/np.real(nf))  #np.real(nf))
     #print('phase=', phase)
