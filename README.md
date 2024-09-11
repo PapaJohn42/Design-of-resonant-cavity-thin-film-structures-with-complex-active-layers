@@ -8,7 +8,9 @@ Both 'contour.py' & 'two_contour_equations.py' are from [Optical Thin Film Desig
 <b>To do:</b>
 - [x] Investigate why both q2C and q2D are different from the book. '13.2.3 Resonant-cavity structure with a complex film at the center'
 - [x] Add complex active region (C D C) to 'Figure 13.9 Resonant-cavity structure with a complex film at the center'
-- [ ] Create a TMM Reflection & Absorption spectrum plotter for complex resonant cavity structure
+- [ ] Create a TMM Reflection plotter for complex active region
+- [ ] Investigate why VO@
+- [ ] Create a TMM Absorption & Transmission plotter for complex active region
 - [ ] Try with VO<sub>2</sub>
 
 
