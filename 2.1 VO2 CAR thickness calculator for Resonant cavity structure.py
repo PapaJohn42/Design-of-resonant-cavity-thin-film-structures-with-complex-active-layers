@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 ##Parameters setup [input]
 na = 1.0            #The same as air
 ns = na            	#na = ns satisfied the resonance condition
-nH = 2.4438         #nTiO2; Bond 1965: n(o) 0.45–2.4 µm
-nL = 1.44           #nSiO2; Malitson 1965: n 0.21–6.7 µm
-nC = 2.8593 -1j*0.28114   #nVO2; Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
+nH = 2.44635 #2.4438         #nTiO2; Bond 1965: n(o) 0.45–2.4 µm
+nL = 1.444 #1.44           #nSiO2; Malitson 1965: n 0.21–6.7 µm
+nC = 2.85934 -1j*0.28046 #2.8593 -1j*0.28114   #nVO2; Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
 nD = nH            #nTiO2; Dielectric layer index
 q = 1.0             #Phase thickness of each films is quarter-wave thick.
 N = 4               #Numbers of trilayer structure (substrate side)

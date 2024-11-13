@@ -59,7 +59,7 @@ nf = np.concatenate((nH, nH,nL,nH, nH,nL,nH, nH,nL,nH, nC,nD,nC, nH,nL,nH, nH,nL
 thk_std = 1550.0/4
 
 #thk = np.array([thk_std/2, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, 0.9,152.1,0.9, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std/2 ])	#Thickness of each layer (in nm)
-thk = np.array([thk_std/2, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, 4.38,148.32,4.38, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std/2 ])	#Thickness of each layer (in nm)
+thk = np.array([thk_std/2, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, 4.4352,148.0502,4.4352, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std,thk_std,thk_std, thk_std/2 ])	#Thickness of each layer (in nm)
 
 ts = 500	#Substrate thickness - not relevant unless back=1
 na = 1.0	#Incident medium (ie. air) index
