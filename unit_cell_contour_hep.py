@@ -13,7 +13,7 @@ from contour import contour
 # wl = wavelength (nm)
 # npts = number of plotted points
 
-def unit_cell_contour_hep(ns, n1, n2, N, wl, npts):
+def unit_cell_contour(ns, n1, n2, N, wl, npts):
     # --Create an array of N+1 size. Where cr[0] = ns.
     cr=[np.real(ns)]*(N+1)
     ci=[np.imag(ns)]*(N+1)

@@ -1,6 +1,6 @@
 """ 
-Fig.2. Contour of the "[H/2 U4] H [U4 H/2]" cavity structure at the reference wavelength 
-using refractive indices of H = 2.5 and L = 1.5 for each layers, respectively. 
+Fig.3. Contour of the same "[H/2 U4] H [U4 H/2]" cavity structure as in Fig. 2,
+except the central layer index is 2.5 - j0.25 
 """
 
 import numpy as np
@@ -15,8 +15,8 @@ ns = 1.0            # Substrate index. The same as air.
 na = ns             # na = ns satisfied the resonance condition
 nH = 2.5            # n1
 nL = 1.5            # n2
-nC = nH             # nf1; The central I layer is (C D)
-nD = nH             # nf2; Dielectric layer index
+nC = 2.5 -1j*0.25   # nf1; The central I layer is (C D)
+nD = nC             # nf2; Dielectric layer index
 q = 1.0             # Phase thickness of each films is quarter-wave (pi/2) thick.
 N = 4               # Numbers of trilayer structures (Substrate side)
 M = N               # Numbers of trilayer structures (Incident side)
@@ -41,28 +41,26 @@ print('c1b endpoint =', cr1b[-1] + 1j*ci1b[-1])
 # print('-----')
 
 
-## Calculating from air (endpoint) back to U4
-# U <- U <- U <- U <- H/2 <- air(end)
-## From air to H/2 '3a'
-nf3a = -nH      #Use -nH since we want to plot in the reverse direction
-(cr3a, ci3a, t3a, qr3a, qi3a) = contour(na, nf3a, q/2, wl, npts)   
+## Fom U4 to Central layers (H)
+# R3 -> H/2 -> H/2
+n1b = cr1b[-1] + 1j*ci1b[-1]
+q2C = q
+(cr2a, ci2a, t2a, qr2a, qi2a) = contour(n1b, nC, q2C, wl, npts)
+ns = cr2a[-1] + 1j*ci2a[-1]
 
-## From H/2 to R2 '3b'
-ns = cr3a[-1] + 1j*ci3a[-1]
-(cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 2)    #-nH and -nL are used since we calculate the coutour in reverse order (mirror of c1)
+
+## Calculating from Central layers (H) to air(end)
+# U -> U -> U -> U -> H/2 -> air(end)
+## From U4 to H/2 '3b'
+(cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, nH, nL, M, wl, 2)    #-nH and -nL are used since we calculate the coutour in reverse order (mirror of c1)
+
+## From H/2 to air '3a'
+ns = cr3b[-1] + 1j*ci3b[-1]
+(cr3a, ci3a, t3a, qr3a, qi3a) = contour(ns, nH, q/2, wl, npts)   
 # print('cr3b=', cr3b)
 # print('ci3b=', ci3b)
 print('c3b endpoint =', cr3b[-1] + 1j*ci3b[-1])
 print('-----')
-
-
-## Fom U4 to Central layers (H)
-# R3 -> H/2 -> H/2
-n1b = cr1b[-1] + 1j*ci1b[-1]
-n3b = cr3b[-1] + 1j*ci3b[-1]
-q2C = q
-q2D = q
-(cr2a, ci2a, t2a, qr2a, qi2a) = contour(n1b, nC, q2C, wl, npts)
 
 
 
