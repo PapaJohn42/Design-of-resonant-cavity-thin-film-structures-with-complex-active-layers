@@ -1,8 +1,8 @@
-# Design of resonant cavity thin film structures with complex active layers
-My final bachelor's degree project. Started working around March of 2024.<br/>
-Advisor: [Asst. Prof. Dr. Prathan Buranasiri](https://www.researchgate.net/profile/Prathan-Buranasiri)<br/>
-Based on [research article](https://doi.org/10.1364/JOSAB.404894) of the same name by [Andrew Sarangan](https://udayton.edu/directory/engineering/electrooptics_grad/sarangan_andrew.php). <br/>
-Both 'contour.py' & 'two_contour_equations.py' are from [Optical Thin Film Designs][def] written by Andrew Sarangan.
+# Asymmetrical Resonant cavity Vanadium-dioxide thin film desings
+My final bachelor's degree project. Started working on March of 2024. <br/>
+Advisor: [Asst. Prof. Dr. Prathan Buranasiri](https://www.researchgate.net/profile/Prathan-Buranasiri) <br/>
+Based on [Design of resonant cavity thin film structures with complex active layers](https://doi.org/10.1364/JOSAB.404894) by [Andrew Sarangan](https://udayton.edu/directory/engineering/electrooptics_grad/sarangan_andrew.php). <br/>
+Most of the function are modified from [Optical Thin Film Designs](https://www.routledge.com/Optical-Thin-Film-Design/Sarangan/p/book/9780367512712) written by Andrew Sarangan. <br/>
 
 
 <b>To do:</b>
@@ -13,4 +13,4 @@ Both 'contour.py' & 'two_contour_equations.py' are from [Optical Thin Film Desig
 - [ ] Try with VO<sub>2</sub> from the new dataset
 
 
-This repository isn't in collaboration with Sarangan. It's an independence project.
+This repository isn an independence project. Not in collaboration with anyone.
