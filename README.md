@@ -8,9 +8,9 @@ Most of the function are modified from [Optical Thin Film Designs](https://www.r
 <b>To do:</b>
 - [x] Investigate why both q2C and q2D are different from the book. '13.2.3 Resonant-cavity structure with a complex film at the center'
 - [x] Add complex active region (C D C) to 'Figure 13.9 Resonant-cavity structure with a complex film at the center'
-- [ ] TMM Reflection plotter for complex active region
+- [X] TMM Reflection plotter for complex active region
 - [ ] TMM Absorbtion plotter for complex active region
-- [ ] Try with VO<sub>2</sub> from the new dataset
+- [X] Try with VO<sub>2</sub> from the new dataset
 
 
-This repository isn an independence project. Not in collaboration with anyone.
+This repository isn an independence project. Not in collaboration with Prof. Andrew Sarangan.
