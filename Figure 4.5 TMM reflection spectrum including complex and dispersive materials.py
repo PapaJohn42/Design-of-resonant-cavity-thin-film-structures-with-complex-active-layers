@@ -13,7 +13,7 @@ with open('dataset/Si.csv', 'r', encoding='utf-8-sig') as f:	# Franta et al. 201
 r1 = list(zip(*arr))
 
 arr = []	# reset array
-with open('dataset/SiO2.csv', 'r', encoding='utf-8-sig') as f:	# Rodríguez-de Marcos et al. 2016: n,k 0.03–1.5 µm
+with open('dataset/SiO2.csv', 'r', encoding='utf-8-sig') as f:	# Lemarchand 2013: n,k 0.25–2.5 µm
 	reader = csv.reader(f)
 	next(reader)	# skip the first line (Header)
 	for line in reader:
