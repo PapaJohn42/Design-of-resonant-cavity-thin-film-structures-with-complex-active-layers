@@ -1,8 +1,8 @@
 """ 
-Fig.9.b Resonant cavity structure with N = 4 and M = 3 designed for resonance at 1550 nm 
+Fig.9b Resonant cavity structure with N = 4 and M = 3 designed for resonance at 1550 nm 
 using VO2 in the cold state and TiO2 phasecompensator. 
 (b) reflection and transmission spectra.
-choose either cVO2 or hVO2
+plot both cVO2& hVO2
 """
 
 import numpy as np
@@ -27,22 +27,21 @@ with open('dataset/SiO2.csv', 'r', encoding='utf-8-sig') as f:	# SiO2=1.4657; Le
 		arr.append(list(map(float, line)))
 r2 = list(zip(*arr))
 
-""" Choose me! """
 arr = []	# reset array
 with open('dataset/cVO2.csv', 'r', encoding='utf-8-sig') as f:	# cVO2=3.1462+0.3388j; Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
 	reader = csv.reader(f)
 	next(reader)	# skip the first line (Header)
 	for line in reader:
 		arr.append(list(map(float, line)))
-r3 = list(zip(*arr))
-""" Or me! """
-# arr = []	# reset array
-# with open('dataset/hVO2.csv', 'r', encoding='utf-8-sig') as f:	# hVO2=1.5729+2.7388j; Oguntoye et al. 2023 n,k 0.21–2.5 µm; 80 °C
-# 	reader = csv.reader(f)
-# 	next(reader)	# skip the first line (Header)
-# 	for line in reader:
-# 		arr.append(list(map(float, line)))
-# r3 = list(zip(*arr))
+r3c = list(zip(*arr))
+
+arr = []	# reset array
+with open('dataset/hVO2.csv', 'r', encoding='utf-8-sig') as f:	# hVO2=1.5729+2.7388j; Oguntoye et al. 2023 n,k 0.21–2.5 µm; 80 °C
+	reader = csv.reader(f)
+	next(reader)	# skip the first line (Header)
+	for line in reader:
+		arr.append(list(map(float, line)))
+r3h = list(zip(*arr))
 
 arr = []	# reset array
 with open('dataset/air.csv', 'r', encoding='utf-8-sig') as f:	# na=1.0; Mathar 2007: n 1.3–2.5 µm
@@ -53,16 +52,20 @@ with open('dataset/air.csv', 'r', encoding='utf-8-sig') as f:	# na=1.0; Mathar 2
 r4 = list(zip(*arr))
 
 
-npts = 200 # Number of plotted points
+npts = 100 # Number of plotted points
 wavelengths = np.linspace(1500, 1600, npts)
 nTiO2 = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))
 nSiO2 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))
-nVO2 = np.interp(wavelengths, np.asarray(r3[0])*1000.0, np.asarray(r3[1]-1j*np.asarray(r3[2])))
+ncVO2 = np.interp(wavelengths, np.asarray(r3c[0])*1000.0, np.asarray(r3c[1]-1j*np.asarray(r3c[2])))
+nhVO2 = np.interp(wavelengths, np.asarray(r3h[0])*1000.0, np.asarray(r3h[1]-1j*np.asarray(r3h[2])))
 nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.asarray(r4[2])))
 
-ns = nAir	# na; Mathar 2007: n 1.3–2.5 µm
-nf = np.concatenate((nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2,\
-	 nVO2,nTiO2,nVO2,\
+ns = nAir	# na=1.0; Mathar 2007: n 1.3–2.5 µm
+nfc = np.concatenate((nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2,\
+	 ncVO2,nTiO2,ncVO2,\
+	 nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
+nfh = np.concatenate((nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2,\
+	 nhVO2,nTiO2,nhVO2,\
 	 nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
 wl = 1550.0	#reference wavelength
 tTiO2 = wl/(4*2.2899) # Quarterwave thick
@@ -76,7 +79,8 @@ na = 1.0	# Incident medium (ie. air) index
 q = 0.0     # Incident angle
 sp = 'TM'   # Incident polarization (only for off-normal incidence)
 back = 0    # back=0 will ignore bakcside of the substrate
-[T, R, t, r] = tmm(wavelengths, ns, ts, na, nf, thk, q, sp, back)   # Run TMM
+[Tc, Rc, tc, rc] = tmm(wavelengths, ns, ts, na, nfc, thk, q, sp, back)   # Run TMM
+[Th, Rh, th, rh] = tmm(wavelengths, ns, ts, na, nfh, thk, q, sp, back)   # Run TMM
 
 #np.savetxt('tmm_dispersion_complex.data', np.transpose([wavelengths, R]))   # Save to file
 
@@ -85,12 +89,14 @@ back = 0    # back=0 will ignore bakcside of the substrate
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
 
-ax1.plot(wavelengths, R, color="purple", label="Reflection")
-ax2.plot(wavelengths, T, color="green", label="Transmission")
+ax1.plot(wavelengths, Rc, color="purple", label="Reflection")
+ax1.plot(wavelengths, Rh, color="purple", linestyle="dashed")
+ax2.plot(wavelengths, Tc, color="green", label="Transmission")
+ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
 
 plt.title("Resonant cavity structure with N = 4 and M = 3 designed for resonance\n"
 	"at 1550 nm using VO2 in the cold state and TiO2 phase compensator.", fontsize=12)
-plt.xlabel('Wavelength (nm)')
+ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 ax2.set_ylabel('Transmission', color="green")
 
