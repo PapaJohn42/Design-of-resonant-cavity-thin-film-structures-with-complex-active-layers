@@ -62,11 +62,11 @@ nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.a
 
 ns = nAir	# na=1.0; Mathar 2007: n 1.3–2.5 µm
 nfc = np.concatenate((nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2,\
-	 ncVO2,nTiO2,ncVO2,\
-	 nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
+	ncVO2,nTiO2,ncVO2,\
+	nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
 nfh = np.concatenate((nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2,\
-	 nhVO2,nTiO2,nhVO2,\
-	 nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
+	nhVO2,nTiO2,nhVO2,\
+	nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2,nSiO2,nTiO2, nTiO2)) # Join a sequence of arrays along an existing axis
 wl = 1550.0	#reference wavelength
 tTiO2 = wl/(4*2.2899) # Quarterwave thick
 tSiO2 = wl/(4*1.4657) # Quarterwave thick
@@ -89,16 +89,17 @@ back = 0    # back=0 will ignore bakcside of the substrate
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
 
-ax1.plot(wavelengths, Rc, color="purple", label="Reflection")
-ax1.plot(wavelengths, Rh, color="purple", linestyle="dashed")
-ax2.plot(wavelengths, Tc, color="green", label="Transmission")
+p1, = ax1.plot(wavelengths, Rc, color="purple", label="cold VO2 (resonant)")
+p2, = ax1.plot(wavelengths, Rh, color="purple", label="hot VO2 (non-resonant)", linestyle="dashed")
+ax2.plot(wavelengths, Tc, color="green")
 ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
 
-plt.title("Resonant cavity structure with N = 4 and M = 3 designed for resonance\n"
-	"at 1550 nm using VO2 in the cold state and TiO2 phase compensator.", fontsize=12)
+plt.title("Resonant cavity structure with N = 4 & M = 3 designed for 1550 nm resonance.\n"
+	"Plot both the Reflection and Transmission spectra of cold & hot VO2 states.", fontsize=11)
 ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 ax2.set_ylabel('Transmission', color="green")
+ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
 
 plt.xlim(1500, 1600)
 ax1.set_ylim(0.0, 1.0)	# Reflection
