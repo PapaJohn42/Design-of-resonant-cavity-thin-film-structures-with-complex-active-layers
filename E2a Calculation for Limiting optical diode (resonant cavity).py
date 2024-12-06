@@ -4,8 +4,6 @@ Designed with a VO2 Layer in the Cold State
 
 Result:
 N	M	tcVO2(nm)	tTiO2(nm)
-5	4	4.2			132.0
-5	1	124.6		153.5
 4	3	7.6			123.0
 4	2	27.6		74.9
 4	1	120.2		165.6
@@ -34,10 +32,12 @@ nC = 3.1268 -1j*0.3969  # VO2; Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
 # nC = 3.02 - 1j*0.325
 nD = nH             # TiO2
 q = 1.0             # Phase thickness of each films is quarter-wave thick.
-N = 2               # Numbers of trilayer structure (substrate side)	[input]
-M = 1               # Numbers of trilayer structures (Incident side)	[input]
+N = 4               # Numbers of trilayer structure (substrate side)	[input]
+M = 3               # Numbers of trilayer structures (Incident side)	[input]
 wl = 1320.0         # Wavelength in nm
 npts = 1000			# Numbers of plotted points
+q2C = 0.5			# starting estimate [input]
+q2D = 0.5			# starting estimate [input]
 
 ## The cavity structures are H/2 R3 I R2 H/2; R = (H/2 L H/2); I = (C D)
 print("### The cavity structures are [H/2 UN] [nC nD nC] [UM H/2]; U = (H/2 L H/2)")
@@ -61,7 +61,7 @@ ns = cr1a[-1] + 1j*ci1a[-1]
 (cr1b, ci1b, t1b, qr1b, qi1b) = unit_cell_contour(ns, nH, nL, N, wl, 2)
 ##print('cr1b=', cr1b)
 ##print('ci1b=', ci1b)
-print('> c1b endpoint=', cr1b[-1] + 1j*ci1b[-1])
+#print('> c1b endpoint=', cr1b[-1] + 1j*ci1b[-1])
 
 
 ##Calculating from air (endpoint) back to U2
@@ -74,15 +74,13 @@ ns = cr3a[-1] + 1j*ci3a[-1]
 (cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 2)    #-nH and -nL are used since we calculate the coutour in reverse order (mirror of c1)
 ##print('cr3b=', cr3b)
 ##print('ci3b=', ci3b)
-print('> c3b endpoint=', cr3b[-1] + 1j*ci3b[-1])
+#print('> c3b endpoint=', cr3b[-1] + 1j*ci3b[-1])
 
 
 ##Fom U4 to Active layers (C D C)
 # U4 -> C -> D -> C ->
 n1b = cr1b[-1] + 1j*ci1b[-1]
 n3b = cr3b[-1] + 1j*ci3b[-1]
-q2C = 0.1	#starting estimate [input]
-q2D = 0.4	#starting estimate [input]
 
 def three_contour_equations(p, nf1, nf2, ns, na):
 	q1, q2 = p
@@ -97,8 +95,8 @@ def three_contour_equations(p, nf1, nf2, ns, na):
 	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
 
 q2C, q2D = fsolve(three_contour_equations, (q2C,q2D), (nC, nD, n1b, n3b))
-print('q2Complex=', q2C, 'pi/2 unit')
-print('q2Dielectric=', q2D, 'pi/2 unit')
+#print('q2Complex=', q2C, 'pi/2 unit')
+#print('q2Dielectric=', q2D, 'pi/2 unit')
 
 
 (cr2a, ci2a, t2a, qr2a, qi2a) = contour(n1b, nC, q2C, wl, npts)
