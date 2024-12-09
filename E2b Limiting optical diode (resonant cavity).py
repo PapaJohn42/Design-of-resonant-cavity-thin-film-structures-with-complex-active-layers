@@ -41,6 +41,7 @@ nhVO2 = np.interp(wavelengths, np.asarray(r3h[0])*1000.0, np.asarray(r3h[1]-1j*n
 nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.asarray(r4[2])))		# nAir
 ns = nAir
 
+
 """
 Construct an arrray of resonant cavity structure
 """

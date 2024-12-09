@@ -1,6 +1,7 @@
 ## Function for calculating equivalent index(n), phase thickness(q)
 ## and create an endpoint for trilayer unit cells of N size.
 ## In this version, each layers in the trilayer unit cell are used in the calculation.
+## The unit cell is structured as [n1/2 n2 n1/2]
 
 import numpy as np
 from contour import contour
