@@ -47,6 +47,7 @@ Construct an arrray of resonant cavity structure
 """
 # Function for creating Resonant cavity structure in an refractive index array
 def AsymReca_index(nH, nL, nf, nD, N, M):
+	# [U]^N [C D C] [U]^M
 	nU = np.concatenate((nH, nL, nH))	# Unit cell index
 	
 	# Substrate side
@@ -76,6 +77,7 @@ nfh = AsymReca_index(nH, nL, nhVO2, nH, N, M)	# Cavity structure in hot VO2 phas
 
 # Function for creating Resonant cavity structure in an thickness array
 def AsymReca_thk(tH, tL, tf, tD, N, M):
+	# [U]^N [C D C] [U]^M
 	tU = [tH/2, tL, tH/2]
 	
 	tPSM = [tH/2]
