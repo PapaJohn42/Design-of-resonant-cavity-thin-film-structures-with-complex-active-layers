@@ -1,5 +1,6 @@
 """ 
-TMM grapher
+TMM grapher for "Limiting Optical Diodes Enabled by the Phase Transition of Vanadium Dioxide"
+Layout: Substrate --> VO2 Au --> Air
 """
 
 import numpy as np
@@ -21,21 +22,20 @@ def dataset_reader(path):
 			arr.append(list(map(float, line)))
 	return list(zip(*arr))
 
-r1 = dataset_reader("dataset/TiO2.csv")		# [input]
-r2 = dataset_reader("dataset/Al2o3.csv")	# [input]	
-r3c = dataset_reader("dataset/cVO2.csv")	# [input]
-r3h = dataset_reader("dataset/hVO2.csv")	# [input]
-r4 = dataset_reader("dataset/air.csv")		# [input]
+r1 = dataset_reader("dataset/Au.csv")		# Yakubovsky et al. 2019: 9-nm film; n,k 0.30–3.3 µm
+r2 = dataset_reader("dataset/Al2o3.csv")	# Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	
+r3c = dataset_reader("dataset/VO2_25deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
+r3h = dataset_reader("dataset/VO2_100deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 100 °C
+r4 = dataset_reader("dataset/air.csv")		# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm 
 
-npts = 2900 # Number of plotted points		# [input]
-wavelengths = np.linspace(500, 1700, npts)	# [input]
-nH = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))		# nTiO2; np.interpolate(range, wl(um -> nm), index n-k)
-nL = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))		# nAl2O3 (Sapphire)
+npts = 1000 # Number of plotted points		# [input]
+wavelengths = np.linspace(1000, 2000, npts)	# [input]
+nAu = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))		# nAu; np.interpolate(range, wl(um -> nm), index n-k)
+nAl2O3 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))	# nAl2O3 (Sapphire)
 ncVO2 = np.interp(wavelengths, np.asarray(r3c[0])*1000.0, np.asarray(r3c[1]-1j*np.asarray(r3c[2])))	# ncoldVO2
 nhVO2 = np.interp(wavelengths, np.asarray(r3h[0])*1000.0, np.asarray(r3h[1]-1j*np.asarray(r3h[2])))	# nhotVO2
 nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.asarray(r4[2])))		# nAir
-ns = nAir
-
+ns = nAl2O3
 
 """
 Construct an arrray of resonant cavity structure
@@ -64,10 +64,8 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 
 	return nPSM
 
-N = 4		# Numbers of trilayer structure (substrate side)	[input]
-M = 3		# Numbers of trilayer structures (Incident side)	[input]
-nfc = AsymReca_index(nH, nL, ncVO2, nH, N, M)	# Cavity structure in cold VO2 phase
-nfh = AsymReca_index(nH, nL, nhVO2, nH, N, M)	# Cavity structure in hot VO2 phase
+nfc = np.concatenate((ncVO2, nAu))	# Join a sequence of arrays along an existing axis
+nfh = np.concatenate((nhVO2, nAu))
 
 
 # Function for creating Resonant cavity structure in an thickness array
@@ -88,11 +86,9 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 	return tPSM
 
 wl = 1320.0		# Reference wavelength (nm)	[input]
-tTiO2 = wl/(4*2.2964) # Quarterwave thick	[input]
-tAl2O3 = wl/(4*1.748) # Quarterwave thick	[input]
-tVO2 = 7.6		# tVO2						[input]
-tD = 123.0		# TiO2 central layer 		[input]
-thk = AsymReca_thk(tTiO2, tAl2O3, tVO2, tD, N, M)
+tAu = 10 # Quarterwave thick	[input]
+tVO2 = 100 # Quarterwave thick	[input]
+thk = np.array([tVO2, tAu])	
 
 ts = 500*1000	# Substrate thickness - not relevant unless back=1
 na = 1.0	# Incident medium (ie. air) index
@@ -101,7 +97,6 @@ sp = 'TM'   # Incident polarization (only for off-normal incidence)
 back = 0    # back=0 will ignore bakcside of the substrate
 [Tc, Rc, tc, rc] = tmm(wavelengths, ns, ts, na, nfc, thk, q, sp, back)   # Run TMM
 [Th, Rh, th, rh] = tmm(wavelengths, ns, ts, na, nfh, thk, q, sp, back)   # Run TMM
-
 
 # Calculate Absorption = 1.0 - (Transmission + Reflection)
 Ac = np.full(npts, 1.0)
@@ -126,7 +121,7 @@ ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 
 # choose either T or A
-y_graph = "A"	# T: transmission or A: absorption
+y_graph = "T"	# T: transmission or A: absorption
 if y_graph == "T":
 	ax2.plot(wavelengths, Tc, color="green")
 	ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
