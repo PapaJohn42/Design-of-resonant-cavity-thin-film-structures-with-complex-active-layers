@@ -1,15 +1,15 @@
 """ 
-Table 3. Calculated Results for the Resonant Cavity 
-Designed for resonant with a VO2 in the Cold State
+Calculate the thickness of each central cavity layers used in asymmetrical resonant cavity structure
+H/2 [U]^N [C D C] [U]^M H/2
 
 Result:
 N	M	tcVO2(nm)	tTiO2(nm)
-4	3	7.6			123.0
-4	2	27.6		74.9
-4	1	120.2		165.6
-3	2	14.5		105.5
-3	1	110.8		189.3
-2	1	36.1		56.9
+4	3	
+4	2	
+4	1	
+3	2	
+3	1	
+2	1	
 """
 
 import numpy as np
@@ -17,6 +17,7 @@ from scipy.optimize import fsolve
 from scipy.optimize import minimize
 from contour import contour
 from unit_cell_contour import unit_cell_contour
+from two_contour_equations import three_contour_equations
 import matplotlib.pyplot as plt
 
 """
@@ -26,7 +27,6 @@ na = 1.0            # The same as air
 ns = na            	# na = ns satisfied the resonance condition
 nH = 2.2964      	# TiO2; Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm [input]
 nL = 1.748   		# Al2O3; Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	[input]
-#nL = 1.748 -1j*0.019   	# Al2O3; Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	[input]
 nC = 3.1268 -1j*0.3969  # VO2; Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
 nD = nH             # TiO2
 q = 1.0             # Phase thickness of each films is quarter-wave thick.
@@ -51,7 +51,7 @@ print('===')
 
 
 """
-Calculate from the substrate side back to the central cavity structure
+(1) Calculate from the substrate side back to the central cavity structure
 assuming substrate is air
 """
 ## The H/2 layer
@@ -62,7 +62,7 @@ ns = cr1a[-1] + 1j*ci1a[-1]
 
 
 """
-Calculate from the incident side up to the central cavity structure
+(2) Calculate from the incident side up to the central cavity structure
 """
 ## The H/2 layer
 (cr3a, ci3a, t3a, qr3a, qi3a) = contour(na, -nH, q/2, wl, npts)	# -nH because we calculate the contour in reverse
@@ -72,22 +72,8 @@ ns = cr3a[-1] + 1j*ci3a[-1]
 
 
 """
-Calculate the thickness of complex film layers and the dielectric layer
+(3) Calculate the thickness of complex film layers and the dielectric layer
 """
-# Fucntion for [nC nD nC] structure. Refer to 'two_contour_equations.py' [nC nD]
-def three_contour_equations(p, nf1, nf2, ns, na):
-	q1, q2 = p				# p are the solved value
-	if q1 <= 0 or q2 <= 0:  # Help penalized negative value when sovling for p
-		return (1e6, 1e6)
-	
-	(cr,ci,_,_,_) = contour(ns, nf1, q1, 1, 2)
-	ns = cr[-1]+1j*ci[-1]
-	(cr,ci,_,_,_) = contour(ns, nf2, q2, 1, 2)
-	ns = cr[-1]+1j*ci[-1]
-	(cr,ci,_,_,_) = contour(ns, nf1, q1, 1, 2)
-
-	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
-
 n1b = cr1b[-1] + 1j*ci1b[-1]	# Equivalent to ns
 n3b = cr3b[-1] + 1j*ci3b[-1]	# Equivalent to na
 q2C, q2D = fsolve(three_contour_equations, (q2C,q2D), (nC, nD, n1b, n3b))

@@ -1,10 +1,5 @@
 """ 
-Limiting Optical Diodes Enabled by the Phase Transition of Vanadium Dioxide
-Chenghao Wan, et al.
-The reference wavelength is 1320 nm
-cVO2 = 25°C, hVO2 = 100°C
-nH=nD=TiO2, nL=Al2O3, nC=VO2
-*Problem with choosing each layer datasets & substituting Au with TiO2 might cause problem?
+TMM grapher
 """
 
 import numpy as np
@@ -123,3 +118,25 @@ plt.legend(loc='upper right', fontsize=8)
 plt.xlim(1200, 1400)	# [input]
 plt.ylim(0.0, 1.0)		# [input]
 plt.show()
+
+"""
+fig, ax1 = plt.subplots()
+ax2 = ax1.twinx()
+
+p1, = ax1.plot(wavelengths, Rc, color="purple", label="cold VO2 (resonant)")
+p2, = ax1.plot(wavelengths, Rh, color="purple", label="hot VO2 (non-resonant)", linestyle="dashed")
+ax2.plot(wavelengths, Tc, color="green")
+ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
+
+plt.title("Resonant cavity structure with N = 4 & M = 3 designed for 1550 nm resonance.\n"
+	"Plot both the Reflection and Transmission spectra of cold & hot VO2 states.", fontsize=11)
+ax1.set_xlabel('Wavelength (nm)')
+ax1.set_ylabel('Reflection', color="purple")
+ax2.set_ylabel('Transmission', color="green")
+ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
+
+plt.xlim(1500, 1600)
+ax1.set_ylim(0.0, 1.0)	# Reflection
+ax2.set_ylim(0.0, 1.0)	# Transmission
+plt.show()
+"""
