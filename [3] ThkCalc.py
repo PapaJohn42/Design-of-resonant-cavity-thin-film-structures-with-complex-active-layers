@@ -17,22 +17,23 @@ N	M	tVO2(nm)	tD (TiO2)(nm)
 2	1	111.2		194.4
 
 Result: [C D]
+5	4	4.7			137.8
 5	3	23.1		116.2
 4	3	14.3		126.3
 4	2	120.7		13.7
 4	1	160.4		249.6
 3	2	109.0		26.9
 3	1	155.0		257.4
-2	1	141.6		276.0
+2	1	
 
 Result: [D C]	*
-5	3	98.0		22.5
-4	3	104.2		14.2
-4	2	16.5		143.3
-4	1	186.0		214.0
-3	2	82.1		45.3
-3	1	192.8		207.0
-2	1	212.3		186.3
+5	3	122.1		18.0
+4	3	129.7		11.4
+4	2	115.1		20.5
+4	1	231.5		171.8
+3	2	102.3		36.4
+3	1	240.0		166.2
+2	1	264.3		149.6
 """
 
 import numpy as np
@@ -53,12 +54,12 @@ nL = 1.4661   		# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm
 nC = 2.8593 -1j*0.28114  # Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
 nD = nH             # TiO2
 q = 1.0             # Phase thickness of each films is quarter-wave thick.
-N = 4               # Numbers of trilayer structure (substrate side)	[input]
-M = 3               # Numbers of trilayer structures (Incident side)	[input]
+N = 3               # Numbers of trilayer structure (substrate side)	[input]
+M = 2               # Numbers of trilayer structures (Incident side)	[input]
 wl = 1320.0         # Wavelength in nm
 npts = 1000			# Numbers of plotted points
-q2C = 0.5			# starting estimate [input]
-q2D = 0.5			# starting estimate [input]
+q2C = 1			# starting estimate [input]
+q2D = 0.5		# starting estimate [input]
 
 ## The cavity structures are H/2 R3 I R2 H/2; R = (H/2 L H/2); I = (C D)
 print("### The cavity structures are [H/2 UN] [nC nD nC] [UM H/2]; U = (H/2 L H/2)")
@@ -81,7 +82,7 @@ assuming substrate is air
 (cr1a, ci1a, t1a, qr1a, qi1a) = contour(ns, nH, q/2, wl, npts)	# contour(substrate index, film index, film thickness (unit: quarter wave), number of plotted points)
 ## N = The number unit cells layers
 ns = cr1a[-1] + 1j*ci1a[-1]
-(cr1b, ci1b, t1b, qr1b, qi1b) = unit_cell_contour(ns, nH, nL, N, wl, 2)
+(cr1b, ci1b, t1b, qr1b, qi1b) = unit_cell_contour(ns, nH, nL, N, wl, 5)
 
 
 """
@@ -91,7 +92,7 @@ ns = cr1a[-1] + 1j*ci1a[-1]
 (cr3a, ci3a, t3a, qr3a, qi3a) = contour(na, -nH, q/2, wl, npts)	# -nH because we calculate the contour in reverse
 ## M = The number unit cell(s) layers
 ns = cr3a[-1] + 1j*ci3a[-1]
-(cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 2)    # -nH and -nL are used since we calculate the coutour in reverse
+(cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 5)    # -nH and -nL are used since we calculate the coutour in reverse
 
 
 """
@@ -110,34 +111,33 @@ def three_contour_equations(p, nf1, nf2, ns, na):
 	ns = cr[-1]+1j*ci[-1]
 
 	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
-q2C, q2D = fsolve(three_contour_equations, (q2D,q2C), (nD, nC, n1b, n3b))
+q2C, q2D = fsolve(three_contour_equations, (q2C,q2D), (nC, nD, n1b, n3b))
 
 # [nC]
-(cr2a, ci2a, t2a, qr2b, qi2b) = contour(n1b, nD, q2D, wl, npts)
+(cr2a, ci2a, t2a, qr2b, qi2b) = contour(n1b, nC, q2C, wl, npts)
 ns=cr2a[-1] +1j*ci2a[-1]
 # [nC nD]
-(cr2b, ci2b, t2b, qr2a, qi2a) = contour(ns, nC, q2C, wl, npts)
+(cr2b, ci2b, t2b, qr2a, qi2a) = contour(ns, nD, q2D, wl, npts)
 ns=cr2b[-1] +1j*ci2b[-1]
 # [nC nD nC]
 (cr2c, ci2c, t2c, qr2c, qi2c) = contour(ns, nC, q2C, wl, npts)
 
 print('Layers thickness: \
-	  \nt2Complex (each)=', round(t2b[-1], 1), 'nm \
-	  \nt2Dielectric=', round(t2a[-1], 1), ' nm')
+	  \nt2Complex (each)=', round(t2a[-1], 1), 'nm \
+	  \nt2Dielectric=', round(t2b[-1], 1), ' nm')
 
 
 """
 Graph plotter
-
+"""
 plt.plot(cr1a, ci1a, color='grey')
 plt.plot(cr1b, ci1b, color='purple', linestyle='dashed', marker = 'o')    
 plt.plot(cr2a, ci2a, color='green')
 plt.plot(cr2b, ci2b, color='yellow')
-plt.plot(cr2c, ci2c, color='green')
+#plt.plot(cr2c, ci2c, color='green')
 plt.plot(cr3b, ci3b, color='cyan', linestyle='dashed', marker = 'o')
 plt.plot(cr3a, ci3a, color='grey')
 
 plt.xlabel('Real Index')
 plt.ylabel('Imaginary Index')
 plt.show()
-"""

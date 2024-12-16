@@ -1,6 +1,6 @@
 """ 
-TMM grapher for "Optical limiters relying on VO2 phase transition in thin multilayer films"
-Layout: Substrate --> Au VO2 --> Air
+Redesigned TMM for "  "
+Layout: Substrate --> H/2 U^N [C D C] U^M H/2 --> Air
 """
 
 import numpy as np
@@ -22,20 +22,43 @@ def dataset_reader(path):
 			arr.append(list(map(float, line)))
 	return list(zip(*arr))
 
-r1 = dataset_reader("dataset/Au.csv")		# Yakubovsky et al. 2019: 9-nm film; n,k 0.30–3.3 µm
-r2 = dataset_reader("dataset/Al2o3.csv")	# Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	
+
+"""
+Input
+""" 
+# Number of unit cells
+N = 4		# Numbers of trilayer structure (substrate side)	[input]
+M = 3		# Numbers of trilayer structures (Incident side)	[input]
+
+# Layer's thickness
+wl = 1550.0		# Reference wavelength (nm)	[input]
+tTiO2 = wl/(4*2.2899) # Quarterwave thick	[input]
+tAl2O3 = wl/(4*1.4657) # Quarterwave thick	[input]
+tVO2 = 42.9		# tVO2						[input]
+tD = 120.3		# TiO2 central layer 		[input]
+
+# choose either T or A
+y_graph = "T"	# T: transmission or A: absorption	[input]
+wl_low = 1530	# lower wavelength limit
+wl_high = 1570	# upper wavelength limit
+
+# dataset
+r1 = dataset_reader("dataset/TiO2.csv")			# Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm
+r2 = dataset_reader("dataset/SiO2.csv")			# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm	
 r3c = dataset_reader("dataset/VO2_20deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
 r3h = dataset_reader("dataset/VO2_70deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 70 °C
-r4 = dataset_reader("dataset/air.csv")		# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm 
-
-npts = 1000 # Number of plotted points		# [input]
-wavelengths = np.linspace(1000, 2000, npts)	# [input]
-nAu = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))		# nAu; np.interpolate(range, wl(um -> nm), index n-k)
-nAl2O3 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))	# nAl2O3 (Sapphire)
+r4 = dataset_reader("dataset/air.csv")			# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm
+npts = 500 # Number of plotted points			# [input]
+wavelengths = np.linspace(wl_low, wl_high, npts)
+nTiO2 = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))	# nAu; np.interpolate(range, wl(um -> nm), index n-k)
+nSiO2 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))	# nAl2O3 (Sapphire)
 ncVO2 = np.interp(wavelengths, np.asarray(r3c[0])*1000.0, np.asarray(r3c[1]-1j*np.asarray(r3c[2])))	# ncoldVO2
 nhVO2 = np.interp(wavelengths, np.asarray(r3h[0])*1000.0, np.asarray(r3h[1]-1j*np.asarray(r3h[2])))	# nhotVO2
 nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.asarray(r4[2])))		# nAir
-ns = nAl2O3
+ns = nAir
+nH = nTiO2
+nL = nSiO2
+
 
 """
 Construct an arrray of resonant cavity structure
@@ -52,7 +75,9 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 		nPSM = np.concatenate((nPSM, nU))
 		i+=1
 
-	# Central cavity layers
+	# Central cavity layers [C D C]
+	#####nPSM = np.concatenate((nPSM, nf, nD, nf))
+	# Central cavity layers [C D]
 	nPSM = np.concatenate((nPSM, nf, nD, nf))
 
 	# Incident side
@@ -64,8 +89,8 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 
 	return nPSM
 
-nfc = np.concatenate((nAu, ncVO2))	# Join a sequence of arrays along an existing axis
-nfh = np.concatenate((nAu, nhVO2))
+nfc = AsymReca_index(nH, nL, ncVO2, nH, N, M)	# Cavity structure in cold VO2 phase
+nfh = AsymReca_index(nH, nL, nhVO2, nH, N, M)	# Cavity structure in hot VO2 phase
 
 
 # Function for creating Resonant cavity structure in an thickness array
@@ -77,6 +102,7 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 	for N in range(N):
 		tPSM += tU
 
+	#####tPSM += [tf, tD, tf]
 	tPSM += [tf, tD, tf]
 
 	for M in range(M):
@@ -85,12 +111,11 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 
 	return tPSM
 
-wl = 1550.0		# Reference wavelength (nm)	[input]
-tAu = 6 # Quarterwave thick	[input]
-tVO2 = 52 # Quarterwave thick	[input]
-thk = np.array([tAu, tVO2])	
+thk = AsymReca_thk(tTiO2, tAl2O3, tVO2, tD, N, M)
 
-ts = 500	# Substrate thickness - not relevant unless back=1
+
+# TMM
+ts = 500*1000	# Substrate thickness - not relevant unless back=1
 na = 1.0	# Incident medium (ie. air) index
 q = 0.0     # Incident angle
 sp = 'TM'   # Incident polarization (only for off-normal incidence)
@@ -105,10 +130,31 @@ Ac = Ac - (Tc + Rc)
 Ah = Ah - (Th + Rh)
 
 
+""""""
+# Find the index of the wavelength closest to 1550 nm
+index = np.abs(wavelengths - wl).argmin()
+
+# Extract values for 1550 nm
+transmission_cold = Tc[index]
+transmission_hot = Th[index]
+absorption_cold = Ac[index]
+absorption_hot = Ah[index]
+reflection_cold = Rc[index]
+reflection_hot = Rh[index]
+
+# Print the values
+print(f"Data at {wl} nm:")
+print(f"Transmission (cold VO2): {transmission_cold:.4f}")
+print(f"Transmission (hot VO2): {transmission_hot:.4f}")
+print(f"Absorption (cold VO2): {absorption_cold:.4f}")
+print(f"Absorption (hot VO2): {absorption_hot:.4f}")
+print(f"Reflection (cold VO2): {reflection_cold:.4f}")
+print(f"Reflection (hot VO2): {reflection_hot:.4f}")
+
+
 """
 Plot a graph(s)
 """
-
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
 
@@ -120,8 +166,7 @@ p2, = ax1.plot(wavelengths, Rh, color="purple", label="hot VO2 (non-resonant)", 
 ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 
-# choose either T or A
-y_graph = "T"	# T: transmission or A: absorption	[input]
+# Plotting Transmission or Absroption
 if y_graph == "T":
 	ax2.plot(wavelengths, Tc, color="green")
 	ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
@@ -133,7 +178,7 @@ elif y_graph == "A":
 
 ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
 
-plt.xlim(1520, 1570)
+plt.xlim(wl_low, wl_high)
 ax1.set_ylim(0.0, 1.0)	# Reflection
 ax2.set_ylim(0.0, 1.0)	# Transmission
 plt.show()

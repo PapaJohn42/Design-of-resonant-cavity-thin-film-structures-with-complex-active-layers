@@ -1,139 +1,146 @@
 """ 
-TMM grapher for "Limiting Optical Diodes Enabled by the Phase Transition of Vanadium Dioxide"
-Layout: Substrate --> VO2 Au --> Air
+Calculate the thickness of each central cavity layers used in asymmetrical resonant cavity structure
+H/2 [U]^N [C D C] [U]^M H/2
+H = TiO2 = 2.2899
+L = SiO2 = 1.4657
+
+Result:	[C D C]
+N	M	tVO2(nm)	tD (TiO2)(nm)
+5	4	2.0			163.7
+5	3	7.1			149.5
+5	2	23.3		108.5
+5	1	138.3		198.8
+4	3	4.9			155.4
+4	2	20.0		116.4
+4	1	135.9		205.2
+3	2	13.1		133.6
+3	1	129.1		222.3					
+2	1	94.0		299.9
+
+Result: [C D]
+5	4	4.2			163.2
+5	3	19.5		143.2
+4	3	12.6		152.0
+4	2	127.6		27.2
+4	1	166.6		312.1
+3	2	116.3		40.3
+3	1	161.8		319.9
+2	1	150.0		333.7
+
+Result: [D C]	*
+5	4	163.7		3.9
+5	3	149.0		15.1
+4	3	155.8		9.8
+4	2	56.3		102.3
+4	1	293.2		177.4
+3	2	25.9		136.1
+3	1	303.3		171.6
+2	1	336.4		150.9
 """
 
 import numpy as np
-import csv
-from tmm import tmm
+from scipy.optimize import fsolve
+from scipy.optimize import minimize
+from contour import contour
+from unit_cell_contour import unit_cell_contour
+from two_contour_equations import three_contour_equations
 import matplotlib.pyplot as plt
 
 """
-Initial refractive index datasets. Input is .csv files with
-[Input] in .csv only: wavelength (in um), Real index and Img index
+Parameters setup
 """
-# Function for reading refractive index datasets
-def dataset_reader(path):
-	arr = []	# Create an empty array
-	with open(path, 'r', encoding='utf-8-sig') as f:
-		reader = csv.reader(f)
-		next(reader)	# skip the header (1st line)
-		for line in reader:
-			arr.append(list(map(float, line)))
-	return list(zip(*arr))
+na = 1.0            # The same as air
+ns = na            	# na = ns satisfied the resonance condition
+nH = 2.2899 		# TiO2; Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm
+nL = 1.4657   		# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm	
+nC = 3.1462 -1j*0.33880  # Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
+nD = nH             # TiO2
+q = 1.0             # Phase thickness of each films is quarter-wave thick.
+N = 3               # Numbers of trilayer structure (substrate side)	[input]
+M = 2               # Numbers of trilayer structures (Incident side)	[input]
+wl = 1550.0         # Wavelength in nm
+npts = 1000			# Numbers of plotted points
+q2C = 0.6			# starting estimate [input]
+q2D = 1.0			# starting estimate [input]
 
-r1 = dataset_reader("dataset/Au.csv")		# Yakubovsky et al. 2019: 9-nm film; n,k 0.30–3.3 µm
-r2 = dataset_reader("dataset/Al2o3.csv")	# Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	
-r3c = dataset_reader("dataset/VO2_25deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
-r3h = dataset_reader("dataset/VO2_100deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 100 °C
-r4 = dataset_reader("dataset/air.csv")		# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm 
+## The cavity structures are H/2 R3 I R2 H/2; R = (H/2 L H/2); I = (C D)
+print("### The cavity structures are [H/2 UN] [nC nD nC] [UM H/2]; U = (H/2 L H/2)")
+print('Parameters')
+print('nH=', nH)
+print('nL=', nL)
+print('nC=', nC)
+print('nD=', nD)
+print('wl=', wl)
+print('N=', N)
+print('M=', M)
+print('===')
 
-npts = 1000 # Number of plotted points		# [input]
-wavelengths = np.linspace(1000, 2000, npts)	# [input]
-nAu = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))		# nAu; np.interpolate(range, wl(um -> nm), index n-k)
-nAl2O3 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))	# nAl2O3 (Sapphire)
-ncVO2 = np.interp(wavelengths, np.asarray(r3c[0])*1000.0, np.asarray(r3c[1]-1j*np.asarray(r3c[2])))	# ncoldVO2
-nhVO2 = np.interp(wavelengths, np.asarray(r3h[0])*1000.0, np.asarray(r3h[1]-1j*np.asarray(r3h[2])))	# nhotVO2
-nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.asarray(r4[2])))		# nAir
-ns = nAl2O3
 
 """
-Construct an arrray of resonant cavity structure
+(1) Calculate from the substrate side back to the central cavity structure
+assuming substrate is air
 """
-# Function for creating Resonant cavity structure in an refractive index array
-def AsymReca_index(nH, nL, nf, nD, N, M):
-	# [U]^N [C D C] [U]^M
-	nU = np.concatenate((nH, nL, nH))	# Unit cell index
+## The H/2 layer
+(cr1a, ci1a, t1a, qr1a, qi1a) = contour(ns, nH, q/2, wl, npts)	# contour(substrate index, film index, film thickness (unit: quarter wave), number of plotted points)
+## N = The number unit cells layers
+ns = cr1a[-1] + 1j*ci1a[-1]
+(cr1b, ci1b, t1b, qr1b, qi1b) = unit_cell_contour(ns, nH, nL, N, wl, 4)
+
+
+"""
+(2) Calculate from the incident side up to the central cavity structure
+"""
+## The H/2 layer
+(cr3a, ci3a, t3a, qr3a, qi3a) = contour(na, -nH, q/2, wl, npts)	# -nH because we calculate the contour in reverse
+## M = The number unit cell(s) layers
+ns = cr3a[-1] + 1j*ci3a[-1]
+(cr3b, ci3b, t3b, qr3b, qi3b) = unit_cell_contour(ns, -nH, -nL, M, wl, 4)    # -nH and -nL are used since we calculate the coutour in reverse
+
+
+"""
+(3) Calculate the thickness of complex film layers and the dielectric layer
+"""
+n1b = cr1b[-1] + 1j*ci1b[-1]	# Equivalent to ns
+n3b = cr3b[-1] + 1j*ci3b[-1]	# Equivalent to na
+def three_contour_equations(p, nf1, nf2, ns, na):
+	q1, q2 = p				# p are the solved value
+	if q1 <= 0 or q2 <= 0:  # Help penalized negative value when sovling for p
+		return (1e6, 1e6)
 	
-	# Substrate side
-	nPSM = nH
-	i=1
-	while i <= N:
-		nPSM = np.concatenate((nPSM, nU))
-		i+=1
+	(cr,ci,_,_,_) = contour(ns, nf1, q1, 1, 2)
+	ns = cr[-1]+1j*ci[-1]
+	(cr,ci,_,_,_) = contour(ns, nf2, q2, 1, 2)
+	# ns = cr[-1]+1j*ci[-1]
+	# (cr,ci,_,_,_) = contour(ns, nf1, q1, 1, 2)
 
-	# Central cavity layers
-	nPSM = np.concatenate((nPSM, nf, nD, nf))
+	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
+q2D, q2C = fsolve(three_contour_equations, (q2D,q2C), (nD, nC, n1b, n3b))
 
-	# Incident side
-	i=1
-	while i <= M:
-		nPSM = np.concatenate((nPSM, nU))
-		i+=1
-	nPSM = np.concatenate((nPSM, nH))
+# [nC]
+(cr2a, ci2a, t2a, qr2b, qi2b) = contour(n1b, nD, q2D, wl, npts)
+ns=cr2a[-1] +1j*ci2a[-1]
+# [nC nD]
+(cr2b, ci2b, t2b, qr2a, qi2a) = contour(ns, nC, q2C, wl, npts)
+ns=cr2b[-1] +1j*ci2b[-1]
+# [nC nD nC]
+(cr2c, ci2c, t2c, qr2c, qi2c) = contour(ns, nC, q2C, wl, npts)
 
-	return nPSM
-
-nfc = np.concatenate((ncVO2, nAu))	# Join a sequence of arrays along an existing axis
-nfh = np.concatenate((nhVO2, nAu))
-
-
-# Function for creating Resonant cavity structure in an thickness array
-def AsymReca_thk(tH, tL, tf, tD, N, M):
-	# [U]^N [C D C] [U]^M
-	tU = [tH/2, tL, tH/2]
-	
-	tPSM = [tH/2]
-	for N in range(N):
-		tPSM += tU
-
-	tPSM += [tf, tD, tf]
-
-	for M in range(M):
-		tPSM += tU
-	tPSM += [tH/2]
-
-	return tPSM
-
-wl = 1320.0		# Reference wavelength (nm)	[input]
-tAu = 10 # Quarterwave thick	[input]
-tVO2 = 100 # Quarterwave thick	[input]
-thk = np.array([tVO2, tAu])	
-
-ts = 500*1000	# Substrate thickness - not relevant unless back=1
-na = 1.0	# Incident medium (ie. air) index
-q = 0.0     # Incident angle
-sp = 'TM'   # Incident polarization (only for off-normal incidence)
-back = 0    # back=0 will ignore bakcside of the substrate
-[Tc, Rc, tc, rc] = tmm(wavelengths, ns, ts, na, nfc, thk, q, sp, back)   # Run TMM
-[Th, Rh, th, rh] = tmm(wavelengths, ns, ts, na, nfh, thk, q, sp, back)   # Run TMM
-
-# Calculate Absorption = 1.0 - (Transmission + Reflection)
-Ac = np.full(npts, 1.0)
-Ah = Ac
-Ac = Ac - (Tc + Rc)
-Ah = Ah - (Th + Rh)
+print('Layers thickness: \
+	  \nt2Complex (each)=', round(t2b[-1], 1), 'nm \
+	  \nt2Dielectric=', round(t2a[-1], 1), ' nm')
 
 
 """
-Plot a graph(s)
+Graph plotter
 """
+plt.plot(cr1a, ci1a, color='grey')
+plt.plot(cr1b, ci1b, color='purple', linestyle='dashed', marker = 'o')    
+plt.plot(cr2a, ci2a, color='green')
+plt.plot(cr2b, ci2b, color='yellow')
+#plt.plot(cr2c, ci2c, color='green')
+plt.plot(cr3b, ci3b, color='cyan', linestyle='dashed', marker = 'o')
+plt.plot(cr3a, ci3a, color='grey')
 
-fig, ax1 = plt.subplots()
-ax2 = ax1.twinx()
-
-p1, = ax1.plot(wavelengths, Rc, color="purple", label="cold VO2 (resonant)")
-p2, = ax1.plot(wavelengths, Rh, color="purple", label="hot VO2 (non-resonant)", linestyle="dashed")
-
-# plt.title("Resonant cavity structure with N = 4 & M = 3 designed for 1550 nm resonance.\n"
-# 	"Plot both the Reflection and Transmission spectra of cold & hot VO2 states.", fontsize=11)
-ax1.set_xlabel('Wavelength (nm)')
-ax1.set_ylabel('Reflection', color="purple")
-
-# choose either T or A
-y_graph = "T"	# T: transmission or A: absorption
-if y_graph == "T":
-	ax2.plot(wavelengths, Tc, color="green")
-	ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
-	ax2.set_ylabel('Transmission', color="green")
-elif y_graph == "A": 
-	ax2.plot(wavelengths, Ac, color="red")
-	ax2.plot(wavelengths, Ah, color="red", linestyle="dashed")
-	ax2.set_ylabel('Absorption', color="red")
-
-ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
-
-plt.xlim(1300, 1350)
-ax1.set_ylim(0.0, 1.0)	# Reflection
-ax2.set_ylim(0.0, 1.0)	# Transmission
+plt.xlabel('Real Index')
+plt.ylabel('Imaginary Index')
 plt.show()

@@ -57,7 +57,7 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 	# Central cavity layers [C D C]
 	#####nPSM = np.concatenate((nPSM, nf, nD, nf))
 	# Central cavity layers [C D]
-	nPSM = np.concatenate((nPSM, nD, nf))
+	nPSM = np.concatenate((nPSM, nf, nD))
 
 	# Incident side
 	i=1
@@ -69,7 +69,7 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 	return nPSM
 
 N = 4		# Numbers of trilayer structure (substrate side)	[input]
-M = 2		# Numbers of trilayer structures (Incident side)	[input]
+M = 3		# Numbers of trilayer structures (Incident side)	[input]
 nfc = AsymReca_index(nH, nL, ncVO2, nH, N, M)	# Cavity structure in cold VO2 phase
 nfh = AsymReca_index(nH, nL, nhVO2, nH, N, M)	# Cavity structure in hot VO2 phase
 
@@ -84,7 +84,7 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 		tPSM += tU
 
 	#####tPSM += [tf, tD, tf]
-	tPSM += [tD, tf]
+	tPSM += [tf, tD]
 
 	for M in range(M):
 		tPSM += tU
@@ -95,8 +95,8 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 wl = 1320.0		# Reference wavelength (nm)	[input]
 tTiO2 = wl/(4*2.2964) # Quarterwave thick	[input]
 tAl2O3 = wl/(4*1.4661) # Quarterwave thick	[input]
-tVO2 = 16.5		# tVO2					[input]
-tD = 123.5		# TiO2 central layer 		[input]
+tVO2 = 14.3		# tVO2					[input]
+tD = 126.3		# TiO2 central layer 		[input]
 thk = AsymReca_thk(tTiO2, tAl2O3, tVO2, tD, N, M)
 
 ts = 500*1000	# Substrate thickness - not relevant unless back=1
@@ -130,7 +130,7 @@ ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 
 # choose either T or A
-y_graph = "A"	# T: transmission or A: absorption
+y_graph = "T"	# T: transmission or A: absorption	[input]
 if y_graph == "T":
 	ax2.plot(wavelengths, Tc, color="green")
 	ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
@@ -142,7 +142,7 @@ elif y_graph == "A":
 
 ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
 
-plt.xlim(1300, 1350)
+plt.xlim(1250, 1400)
 ax1.set_ylim(0.0, 1.0)	# Reflection
 ax2.set_ylim(0.0, 1.0)	# Transmission
 plt.show()
