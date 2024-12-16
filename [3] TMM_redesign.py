@@ -8,6 +8,27 @@ import csv
 from tmm import tmm
 import matplotlib.pyplot as plt
 
+
+"""
+Input
+""" 
+# Number of unit cells
+N = 5		# Numbers of trilayer structure (substrate side)	[input]
+M = 2		# Numbers of trilayer structures (Incident side)	[input]
+
+# Layer's thickness
+wl = 1320.0		# Reference wavelength (nm)	[input]
+tTiO2 = wl/(4*2.2964) # Quarterwave thick	[input]
+tAl2O3 = wl/(4*1.4661) # Quarterwave thick	[input]
+tVO2 = 87.1		# tVO2						[input]
+tD = 48.0		# TiO2 central layer 		[input]
+
+# choose either T or A
+y_graph = "T"	# T: transmission or A: absorption	[input]
+wl_low = 1300	# lower wavelength limit
+wl_high = 1350	# upper wavelength limit
+
+
 """
 Initial refractive index datasets. Input is .csv files with
 [Input] in .csv only: wavelength (in um), Real index and Img index
@@ -22,14 +43,15 @@ def dataset_reader(path):
 			arr.append(list(map(float, line)))
 	return list(zip(*arr))
 
-r1 = dataset_reader("dataset/TiO2.csv")		# Yakubovsky et al. 2019: 9-nm film; n,k 0.30–3.3 µm
-r2 = dataset_reader("dataset/SiO2.csv")	# Querry 1985: α-Al2O3 (Sapphire); n,k(o) 0.21–55.6 µm	
+# dataset
+r1 = dataset_reader("dataset/TiO2.csv")		# Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm
+r2 = dataset_reader("dataset/SiO2.csv")		# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm
 r3c = dataset_reader("dataset/VO2_25deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
 r3h = dataset_reader("dataset/VO2_100deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 100 °C
 r4 = dataset_reader("dataset/air.csv")		# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm 
 
-npts = 1500 # Number of plotted points		# [input]
-wavelengths = np.linspace(1200, 1800, npts)	# [input]
+npts = 500 # Number of plotted points		# [input]
+wavelengths = np.linspace(wl_low, wl_high, npts)
 nTiO2 = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))		# nAu; np.interpolate(range, wl(um -> nm), index n-k)
 nSiO2 = np.interp(wavelengths, np.asarray(r2[0])*1000.0, np.asarray(r2[1]-1j*np.asarray(r2[2])))	# nAl2O3 (Sapphire)
 ncVO2 = np.interp(wavelengths, np.asarray(r3c[0])*1000.0, np.asarray(r3c[1]-1j*np.asarray(r3c[2])))	# ncoldVO2
@@ -38,6 +60,7 @@ nAir = np.interp(wavelengths, np.asarray(r4[0])*1000.0, np.asarray(r4[1]-1j*np.a
 ns = nAir
 nH = nTiO2
 nL = nSiO2
+
 
 """
 Construct an arrray of resonant cavity structure
@@ -57,7 +80,7 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 	# Central cavity layers [C D C]
 	#####nPSM = np.concatenate((nPSM, nf, nD, nf))
 	# Central cavity layers [C D]
-	nPSM = np.concatenate((nPSM, nf, nD))
+	nPSM = np.concatenate((nPSM, nD, nf))	# [input]
 
 	# Incident side
 	i=1
@@ -68,8 +91,6 @@ def AsymReca_index(nH, nL, nf, nD, N, M):
 
 	return nPSM
 
-N = 4		# Numbers of trilayer structure (substrate side)	[input]
-M = 3		# Numbers of trilayer structures (Incident side)	[input]
 nfc = AsymReca_index(nH, nL, ncVO2, nH, N, M)	# Cavity structure in cold VO2 phase
 nfh = AsymReca_index(nH, nL, nhVO2, nH, N, M)	# Cavity structure in hot VO2 phase
 
@@ -84,7 +105,7 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 		tPSM += tU
 
 	#####tPSM += [tf, tD, tf]
-	tPSM += [tf, tD]
+	tPSM += [tD, tf]	# [input]
 
 	for M in range(M):
 		tPSM += tU
@@ -92,13 +113,10 @@ def AsymReca_thk(tH, tL, tf, tD, N, M):
 
 	return tPSM
 
-wl = 1320.0		# Reference wavelength (nm)	[input]
-tTiO2 = wl/(4*2.2964) # Quarterwave thick	[input]
-tAl2O3 = wl/(4*1.4661) # Quarterwave thick	[input]
-tVO2 = 14.3		# tVO2					[input]
-tD = 126.3		# TiO2 central layer 		[input]
 thk = AsymReca_thk(tTiO2, tAl2O3, tVO2, tD, N, M)
 
+
+# TMM
 ts = 500*1000	# Substrate thickness - not relevant unless back=1
 na = 1.0	# Incident medium (ie. air) index
 q = 0.0     # Incident angle
@@ -114,10 +132,31 @@ Ac = Ac - (Tc + Rc)
 Ah = Ah - (Th + Rh)
 
 
+""""""
+# Find the index of the wavelength closest to 1550 nm
+index = np.abs(wavelengths - wl).argmin()
+
+# Extract values for 1550 nm
+transmission_cold = Tc[index]
+transmission_hot = Th[index]
+absorption_cold = Ac[index]
+absorption_hot = Ah[index]
+reflection_cold = Rc[index]
+reflection_hot = Rh[index]
+
+# Print the values
+print(f"Data at {wl} nm:")
+print(f"Transmission (cold VO2): {transmission_cold:.4f}")
+print(f"Transmission (hot VO2): {transmission_hot:.4f}")
+print(f"Absorption (cold VO2): {absorption_cold:.4f}")
+print(f"Absorption (hot VO2): {absorption_hot:.4f}")
+print(f"Reflection (cold VO2): {reflection_cold:.4f}")
+print(f"Reflection (hot VO2): {reflection_hot:.4f}")
+
+
 """
 Plot a graph(s)
 """
-
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
 
@@ -129,8 +168,7 @@ p2, = ax1.plot(wavelengths, Rh, color="purple", label="hot VO2 (non-resonant)", 
 ax1.set_xlabel('Wavelength (nm)')
 ax1.set_ylabel('Reflection', color="purple")
 
-# choose either T or A
-y_graph = "T"	# T: transmission or A: absorption	[input]
+# Plotting Transmission or Absroption
 if y_graph == "T":
 	ax2.plot(wavelengths, Tc, color="green")
 	ax2.plot(wavelengths, Th, color="green", linestyle="dashed")
@@ -142,7 +180,7 @@ elif y_graph == "A":
 
 ax1.legend(handles=[p1, p2], loc='right', fontsize=8)
 
-plt.xlim(1250, 1400)
+plt.xlim(wl_low, wl_high)
 ax1.set_ylim(0.0, 1.0)	# Reflection
 ax2.set_ylim(0.0, 1.0)	# Transmission
 plt.show()

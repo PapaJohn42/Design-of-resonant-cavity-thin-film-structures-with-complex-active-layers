@@ -6,34 +6,28 @@ L = SiO2 = 1.4657
 
 Result:	[C D C]
 N	M	tVO2(nm)	tD (TiO2)(nm)
-5	4	2.2			138.2
-5	3	8.1			123.7
-5	2	30.3		73.2
-5	1	135.9		134.7
-4	3	5.6			129.8
-4	1	133.9		139.9
-3	2	15.6		106.0
-3	1	128.6		153.2					
-2	1	111.2		194.4
+5	4	1.4			139.8
+5	3	5.1			129.7
+5	2	16.0		101.8
+4	3	3.5			133.9
+4	2	13.9		106.9	
+3	2	9.3			118.5
 
 Result: [C D]
-5	4	4.7			137.8
-5	3	23.1		116.2
-4	3	14.3		126.3
-4	2	120.7		13.7
-4	1	160.4		249.6
-3	2	109.0		26.9
-3	1	155.0		257.4
-2	1	
+5	4	3.0			139.5
+5	3	12.8		126.6
+5	2	106.1		26.4
+4	3	8.5			132.0
+4	2	102.5		330.5	
+3	2	91.0		43.0
 
 Result: [D C]	*
-5	3	122.1		18.0
-4	3	129.7		11.4
-4	2	115.1		20.5
-4	1	231.5		171.8
-3	2	102.3		36.4
-3	1	240.0		166.2
-2	1	264.3		149.6
+5	4	2.8			139.8
+5	3	10.6		129.5
+5	2	87.1		48.0
+4	3	7.0			134.1
+4	2	36.5		99.7
+3	2	18.5		120.0
 """
 
 import numpy as np
@@ -51,15 +45,15 @@ na = 1.0            # The same as air
 ns = na            	# na = ns satisfied the resonance condition
 nH = 2.2964 		# TiO2; Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm
 nL = 1.4661   		# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm	
-nC = 2.8593 -1j*0.28114  # Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
+nC = 3.1268 -1j*0.3969  # VO2; Beaini et al. 2020: n,k 0.5–25 µm; 25 °C
 nD = nH             # TiO2
 q = 1.0             # Phase thickness of each films is quarter-wave thick.
-N = 3               # Numbers of trilayer structure (substrate side)	[input]
+N = 5               # Numbers of trilayer structure (substrate side)	[input]
 M = 2               # Numbers of trilayer structures (Incident side)	[input]
 wl = 1320.0         # Wavelength in nm
 npts = 1000			# Numbers of plotted points
-q2C = 1			# starting estimate [input]
-q2D = 0.5		# starting estimate [input]
+q2C = 0.5			# starting estimate [input]
+q2D = 0.5			# starting estimate [input]
 
 ## The cavity structures are H/2 R3 I R2 H/2; R = (H/2 L H/2); I = (C D)
 print("### The cavity structures are [H/2 UN] [nC nD nC] [UM H/2]; U = (H/2 L H/2)")
@@ -109,35 +103,37 @@ def three_contour_equations(p, nf1, nf2, ns, na):
 	ns = cr[-1]+1j*ci[-1]
 	(cr,ci,_,_,_) = contour(ns, nf2, q2, 1, 2)
 	ns = cr[-1]+1j*ci[-1]
+	#(cr,ci,_,_,_) = contour(ns, nf1, q1, 1, 2)
 
 	return (cr[-1]-np.real(na), ci[-1]-np.imag(na))
-q2C, q2D = fsolve(three_contour_equations, (q2C,q2D), (nC, nD, n1b, n3b))
+q2D, q2C = fsolve(three_contour_equations, (q2D,q2C), (nD, nC, n1b, n3b))
 
 # [nC]
-(cr2a, ci2a, t2a, qr2b, qi2b) = contour(n1b, nC, q2C, wl, npts)
+(cr2a, ci2a, t2a, qr2b, qi2b) = contour(n1b, nD, q2D, wl, npts)
 ns=cr2a[-1] +1j*ci2a[-1]
 # [nC nD]
-(cr2b, ci2b, t2b, qr2a, qi2a) = contour(ns, nD, q2D, wl, npts)
+(cr2b, ci2b, t2b, qr2a, qi2a) = contour(ns, nC, q2C, wl, npts)
 ns=cr2b[-1] +1j*ci2b[-1]
 # [nC nD nC]
 (cr2c, ci2c, t2c, qr2c, qi2c) = contour(ns, nC, q2C, wl, npts)
 
 print('Layers thickness: \
-	  \nt2Complex (each)=', round(t2a[-1], 1), 'nm \
-	  \nt2Dielectric=', round(t2b[-1], 1), ' nm')
+	  \nt2Complex (each)=', round(t2b[-1], 1), 'nm \
+	  \nt2Dielectric=', round(t2a[-1], 1), ' nm')
 
 
 """
 Graph plotter
-"""
+
 plt.plot(cr1a, ci1a, color='grey')
 plt.plot(cr1b, ci1b, color='purple', linestyle='dashed', marker = 'o')    
 plt.plot(cr2a, ci2a, color='green')
 plt.plot(cr2b, ci2b, color='yellow')
-#plt.plot(cr2c, ci2c, color='green')
+plt.plot(cr2c, ci2c, color='green')
 plt.plot(cr3b, ci3b, color='cyan', linestyle='dashed', marker = 'o')
 plt.plot(cr3a, ci3a, color='grey')
 
 plt.xlabel('Real Index')
 plt.ylabel('Imaginary Index')
 plt.show()
+"""

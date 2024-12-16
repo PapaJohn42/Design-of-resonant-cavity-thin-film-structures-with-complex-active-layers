@@ -8,20 +8,6 @@ import csv
 from tmm import tmm
 import matplotlib.pyplot as plt
 
-"""
-Initial refractive index datasets. Input is .csv files with
-[Input] in .csv only: wavelength (in um), Real index and Img index
-"""
-# Function for reading refractive index datasets
-def dataset_reader(path):
-	arr = []	# Create an empty array
-	with open(path, 'r', encoding='utf-8-sig') as f:
-		reader = csv.reader(f)
-		next(reader)	# skip the header (1st line)
-		for line in reader:
-			arr.append(list(map(float, line)))
-	return list(zip(*arr))
-
 
 """
 Input
@@ -42,12 +28,28 @@ y_graph = "T"	# T: transmission or A: absorption	[input]
 wl_low = 1530	# lower wavelength limit
 wl_high = 1570	# upper wavelength limit
 
+
+"""
+Initial refractive index datasets. Input is .csv files with
+[Input] in .csv only: wavelength (in um), Real index and Img index
+"""
+# Function for reading refractive index datasets
+def dataset_reader(path):
+	arr = []	# Create an empty array
+	with open(path, 'r', encoding='utf-8-sig') as f:
+		reader = csv.reader(f)
+		next(reader)	# skip the header (1st line)
+		for line in reader:
+			arr.append(list(map(float, line)))
+	return list(zip(*arr))
+
 # dataset
 r1 = dataset_reader("dataset/TiO2.csv")		# Zhukovsky et al. 2015: Thin film; n 0.211–1.69 µm
 r2 = dataset_reader("dataset/SiO2.csv")		# SiO2; Lemarchand 2013: n,k 0.25–2.5 µm	
 r3c = dataset_reader("dataset/VO2_20deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 20 °C
 r3h = dataset_reader("dataset/VO2_70deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 70 °C
 r4 = dataset_reader("dataset/air.csv")		# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm
+
 npts = 500 # Number of plotted points		# [input]
 wavelengths = np.linspace(wl_low, wl_high, npts)	# [input]
 nTiO2 = np.interp(wavelengths, np.asarray(r1[0])*1000.0, np.asarray(r1[1]-1j*np.asarray(r1[2])))	# nAu; np.interpolate(range, wl(um -> nm), index n-k)
