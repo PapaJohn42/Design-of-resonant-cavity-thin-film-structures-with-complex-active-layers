@@ -11,6 +11,7 @@ Most of the function are modified from [Optical Thin Film Designs](https://www.r
 - [X] TMM Reflection plotter for complex active region
 - [X] TMM Absorbtion plotter for complex active region
 - [X] Try VO<sub>2</sub> from the new dataset
-- [ ] Model an optical diode
+- [X] Model an optical diode
+- [ ] Solve the problem of modelling meta-materials (z1 & z2) with complex surface structure. Otherwise, find a new design.
 
 This repository isn an independence project. Not in collaboration with Prof. Andrew Sarangan.
