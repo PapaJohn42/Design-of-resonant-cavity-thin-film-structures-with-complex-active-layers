@@ -1,4 +1,4 @@
-# Asymmetrical Resonant cavity Vanadium-dioxide thin film desings
+# Asymmetrical resonant cavity thin film devices designed for VO2 applications
 My final bachelor's degree project. Started working on March of 2024. <br/>
 Advisor: [Asst. Prof. Dr. Prathan Buranasiri](https://www.researchgate.net/profile/Prathan-Buranasiri) <br/>
 Based on [Design of resonant cavity thin film structures with complex active layers](https://doi.org/10.1364/JOSAB.404894) by [Andrew Sarangan](https://udayton.edu/directory/engineering/electrooptics_grad/sarangan_andrew.php). <br/>
@@ -12,6 +12,8 @@ Most of the function are modified from [Optical Thin Film Designs](https://www.r
 - [X] TMM Absorbtion plotter for complex active region
 - [X] Try VO<sub>2</sub> from the new dataset
 - [X] Model an optical diode
-- [ ] Solve the problem of modelling meta-materials (z1 & z2) with complex surface structure. Otherwise, find a new design.
+- [ ] Solve the problem of modelling meta-materials (z1 & z2) with complex surface structure. Otherwise, find a new design
+- [ ] Write the conference paper
+- [ ] Compare the different between Au and Ag
 
 This repository isn an independence project. Not in collaboration with Prof. Andrew Sarangan.
