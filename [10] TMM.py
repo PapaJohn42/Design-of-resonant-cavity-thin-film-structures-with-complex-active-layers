@@ -43,8 +43,8 @@ def dataset_reader(path):
 # dataset
 r1 = dataset_reader("dataset/Au.csv")
 r2 = dataset_reader("dataset/Si.csv")
-r3c = dataset_reader("dataset/VO2_30deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 30 °C
-r3h = dataset_reader("dataset/VO2_100deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 100 °C
+r3c = dataset_reader("dataset/VO2_Film1_30deg.csv")	# Oguntoye et al. 2023: n,k 0.21–2.5 µm; 30 °C
+r3h = dataset_reader("dataset/VO2_Film1_100deg.csv")	# Beaini et al. 2020: n,k 0.5–25 µm; 100 °C
 r4 = dataset_reader("dataset/air.csv")			# Börzsönyi et al. 2008: n 0.4–1.0 µm + Mathar 2007: n 1.3–2.5 µm
 
 wavelengths = np.linspace(wl_low, wl_high, npts)	# [input]
